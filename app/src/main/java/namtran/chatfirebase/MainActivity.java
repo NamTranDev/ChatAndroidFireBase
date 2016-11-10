@@ -106,7 +106,8 @@ public class MainActivity extends AppCompatActivity {
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                AppSetting.setUserName(MainActivity.this,editText.getText().toString());
+                mUserName = editText.getText().toString();
+                AppSetting.setUserName(MainActivity.this,mUserName);
             }
         });
 
