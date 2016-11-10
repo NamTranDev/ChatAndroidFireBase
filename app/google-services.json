@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "559669815997",
+    "firebase_url": "https://chatandroidfirebase-b2180.firebaseio.com",
+    "project_id": "chatandroidfirebase-b2180",
+    "storage_bucket": "chatandroidfirebase-b2180.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:559669815997:android:a6e498704f45ab66",
+        "android_client_info": {
+          "package_name": "namtran.chatfirebase"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "559669815997-um61l349eh3gikvm3qfrau7k39ct7jdj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBQY1HWywuvcHcVKjKVPBzW8OfdOkjr9cU"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
