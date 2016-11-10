@@ -33,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
     private EditText mEdtRoom;
     private Button mBtnAdd;
     private ListView mLvRoom;
+    private TextView mTxtUser;
 
     private ArrayAdapter<String> mAdapterRoom;
     private List<String> mListRoom = new ArrayList<>();
@@ -46,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
         mEdtRoom = (EditText) findViewById(R.id.chat_firebase_edt_room);
         mBtnAdd = (Button) findViewById(R.id.chat_firebase_btn_addroom);
         mLvRoom = (ListView) findViewById(R.id.chat_firebase_lv_room_chat);
+        mTxtUser = (TextView) findViewById(R.id.chat_firebase_txt_user);
 
         mUserName = AppSetting.getUserName(this);
 
@@ -94,12 +96,14 @@ public class MainActivity extends AppCompatActivity {
 
         if (mUserName.equals("")){
             requestUser();
+        }else {
+            setUser();
         }
     }
 
     private void requestUser() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Enter Name :");
+        builder.setTitle("Enter Name : ");
 
         final EditText editText = new EditText(this);
         builder.setView(editText);
@@ -108,6 +112,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialogInterface, int i) {
                 mUserName = editText.getText().toString();
                 AppSetting.setUserName(MainActivity.this,mUserName);
+                setUser();
             }
         });
 
@@ -120,5 +125,10 @@ public class MainActivity extends AppCompatActivity {
         });
 
         builder.show();
+    }
+
+    private void setUser(){
+        mTxtUser.setText(mUserName);
+        mTxtUser.setVisibility(View.VISIBLE);
     }
 }
