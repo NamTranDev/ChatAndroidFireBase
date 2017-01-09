@@ -37,6 +37,8 @@ public class MainActivity extends AppCompatActivity {
     private List<String> mListRoom = new ArrayList<>();
     private String mUserName;
     private DatabaseReference root = FirebaseDatabase.getInstance().getReference().getRoot();
+    private boolean isDelete;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,12 +53,22 @@ public class MainActivity extends AppCompatActivity {
         mBtnAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Map<String,Object> map = new HashMap<String, Object>();
-                map.put(mEdtRoom.getText().toString(),mUserName);
-                root.updateChildren(map);
-                mEdtRoom.setText("");
+                String room = mEdtRoom.getText().toString();
+                if (room.equals("")){
+                    Toast.makeText(MainActivity.this,"Please Enter Room Name !!!",Toast.LENGTH_SHORT).show();
+                }else {
+                    Map<String,Object> map = new HashMap<String, Object>();
+                    map.put(room,"");
+                    root.updateChildren(map);
+                    DatabaseReference user = FirebaseDatabase.getInstance().getReference().child(room);
+                    Map<String,Object> userMap = new HashMap<String, Object>();
+                    userMap.put("UserCreate",mUserName);
+                    user.updateChildren(userMap);
+                    mEdtRoom.setText("");
+                }
             }
         });
+
         root.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -73,6 +85,7 @@ public class MainActivity extends AppCompatActivity {
             public void onCancelled(DatabaseError databaseError) {
             }
         });
+
         mLvRoom.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -82,29 +95,66 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
         mLvRoom.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, final int i, long l) {
                 final Dialog dialog = new Dialog(MainActivity.this);
                 Button button = new Button(MainActivity.this);
-                button.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                button.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT
+                        , ViewGroup.LayoutParams.WRAP_CONTENT));
                 button.setText("Delete");
                 button.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
+                        isDelete = true;
                         final String chatRoomToDelete = mAdapterRoom.getItem(i);
-                        root.child(chatRoomToDelete).removeValue(new DatabaseReference.CompletionListener() {
+                        root.child(chatRoomToDelete).addValueEventListener(new ValueEventListener() {
                             @Override
-                            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                                if (databaseError == null) {
-                                    mAdapterRoom.remove(chatRoomToDelete);
-                                } else {
-// show databaseError to user
-                                    Toast.makeText(MainActivity.this,"Error",Toast.LENGTH_SHORT).show();
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                if (isDelete){
+                                    String userKey = "";
+                                    Map<String,Object> hashMap = (Map<String, Object>) dataSnapshot.getValue();
+                                    try{
+                                        for (String key : hashMap.keySet()) {
+                                            if (key.equals("UserCreate")){
+                                                userKey = (String) hashMap.get(key);
+                                                break;
+                                            }
+                                        }
+                                        if (userKey.equals(mUserName)){
+                                            root.child(chatRoomToDelete).removeValue(new DatabaseReference.CompletionListener() {
+                                                @Override
+                                                public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                                                    if (databaseError == null) {
+                                                        mAdapterRoom.remove(chatRoomToDelete);
+                                                    } else {
+                                                        // show databaseError to user
+                                                        Toast.makeText(MainActivity.this,"Error",Toast.LENGTH_SHORT).show();
+                                                    }
+                                                    dialog.dismiss();
+                                                    isDelete = false;
+                                                }
+                                            });
+                                        }else {
+                                            Toast.makeText(MainActivity.this,"You are not room master . You can not delete room !!!",Toast.LENGTH_SHORT).show();
+                                            dialog.dismiss();
+                                            isDelete = false;
+                                        }
+                                    }catch (NullPointerException e){
+                                        dialog.dismiss();
+                                        mAdapterRoom.remove(chatRoomToDelete);
+                                    }
+
                                 }
-                                dialog.dismiss();
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
                             }
                         });
+
                     }
                 });
                 dialog.setTitle("Delete Room Chat");
@@ -113,12 +163,14 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         });
+
         if (mUserName.equals("")){
             requestUser();
         }else {
             setUser();
         }
     }
+
     private void requestUser() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Enter Name : ");
@@ -141,6 +193,7 @@ public class MainActivity extends AppCompatActivity {
         });
         builder.show();
     }
+
     private void setUser(){
         mTxtUser.setText(mUserName);
         mTxtUser.setVisibility(View.VISIBLE);
